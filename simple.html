@@ -1,0 +1,76 @@
+<html>
+<head>
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="shaders.js"></script>
+<script type="text/javascript" src="glInit.js"></script>
+
+<script type='text/javascript'>
+  /*
+  there are some global variables are setup in glInit that are used here (such as gl and shaderProgram and the view matrices)
+  */
+  
+  // this is where you put all your vertex data in (sort of - the data actually is uploaded to the video card)
+  var triangleVertexPositionBuffer;
+  
+  function initBuffers() {
+    
+    var vertices = [     // Equilateral Triangle
+       0.0,    1.0, 0.0,
+      -0.866, -0.5, 0.0,
+       0.866, -0.5, 0.0
+    ];
+    
+    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition"); // for the shaders
+    
+    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+    triangleVertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW); // load
+    
+    triangleVertexPositionBuffer.itemSize = 3; // extra data used in drawScene (number of dimensions)
+    triangleVertexPositionBuffer.numItems = 3; // extra data used in drawScene (number of vertices)
+    triangleVertexPositionBuffer.stride   = 0; // space between each vertex
+  }
+  
+  var rotation = 0;
+  function drawScene() {
+    rotation-=0.01;
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix); // setup the perspective frustum of the camera
+    
+    mat4.identity(mvMatrix);                     // init the camera at 0,0 with no scale and no rotation
+    mat4.rotate(mvMatrix, rotation, [0, 0, 1]);  // animation
+    mat4.translate(mvMatrix, [0.0, 0.0, -10.0]); // move the camera back 10 units
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 
+      triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, triangleVertexPositionBuffer.stride, 0);
+    
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+  }
+  
+  function webGLStart() {
+    var canvas = document.getElementById("lesson01-canvas");
+    initGL(canvas);
+    initShaders();
+    initBuffers();
+    
+    gl.clearColor(1, 1, 1, 1.0);
+    gl.enable(gl.DEPTH_TEST);
+    drawScene();
+    window.setInterval('drawScene()', 1000/60); // if you want to animate
+  }
+
+</script>
+</head>
+<body>
+  
+<body onload="webGLStart();" style="margin:50px;text-align:center">
+    <canvas id="lesson01-canvas" style="border: 1px solid #999;" width=700 height=700></canvas>
+</body>
+
+</body>
+</html>
