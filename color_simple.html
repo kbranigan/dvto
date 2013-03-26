@@ -39,6 +39,7 @@
     ];
     
     shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+    
     gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
     triangleVertexColorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
